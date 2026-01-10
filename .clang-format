@@ -1,0 +1,13 @@
+BasedOnStyle: LLVM
+ColumnLimit: 80
+NamespaceIndentation: All
+MaxEmptyLinesToKeep: 2
+AllowShortIfStatementsOnASingleLine: WithoutElse
+
+BreakConstructorInitializers: BeforeComma
+PackConstructorInitializers: Never
+
+# BreakBeforeBraces: Custom
+# BraceWrapping:
+#   AfterFunction: true
+#   SplitEmptyFunction: false
