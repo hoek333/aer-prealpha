@@ -1,5 +1,6 @@
 #pragma once
 #include "rigtorp/SPSCQueue.h"
+#include <thread>
 namespace aer {
 
 
@@ -31,37 +32,68 @@ namespace aer {
 
   /**
    * @class InputHandler
-   * @brief Input handler. Provides a way to send relative timestamped @ref
-   * InputEvent to a queue
+   * @brief Handles input through a queue. When any input is pressed, an event
+   * is sent to the queue. It is the user's job to pop the events, from the main
+   * thread.
+   *
+   * The events are timestamped, with the possibility of resetting the
+   * epoch at any point in time. By default, the epoch is the time at which the
+   * instance has been constructed.
+   *
+   * @thread-safe Construct this on the main thread. Input events must never be
+   * enqueued from the main thread.
    *
    */
   class InputHandler {
-    double epoch;
+    std::atomic<double> epoch;
+    rigtorp::SPSCQueue<InputEvent> queue;
+    std::jthread thread;
 
-  public:
-    InputHandler();
-
-    /**
-     * @brief Get the handler's epoch time in milliseconds (relative to the
-     * program startup)
-     *
-     * @return Epoch time in ms
-     */
-    double get_epoch() const { return epoch; }
-
-    /**
-     * @brief Set the handler's epoch time to now
-     * @return New epoch time in ms
-     */
-    double update_epoch();
-
+  private:
     /**
      * @brief Loop over all possible inputs and send events to the queue if
      * input is detected
      *
      * @param queue Input queue
      */
-    void poll_input(rigtorp::SPSCQueue<InputEvent> &queue) const;
+    void poll_input();
+
+    /**
+     * @brief Job executed by the input thread
+     * @param stop thread stop token
+     */
+    void run(std::stop_token stop);
+
+  public:
+    InputHandler(size_t queue_size);
+
+    /**
+     * @brief Get the handler's epoch in milliseconds (relative to the
+     * program startup)
+     *
+     * @return Epoch in ms
+     */
+    double get_epoch() const { return epoch; }
+
+    /**
+     * @brief Get the handler's queue.
+     * @warning Do not enqueue anything from the main thread.
+     * @return Reference to the input queue
+     */
+    rigtorp::SPSCQueue<InputEvent> &get_queue() { return queue; }
+
+    /**
+     * @brief Set the handler's epoch to the current time.
+     * @return New epoch in ms
+     */
+    double reset_epoch();
+
+    /**
+     * @brief Stop the input thread. This instance will become useless.
+     */
+    void stop();
+
+  private:
   };
 
 

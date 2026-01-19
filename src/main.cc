@@ -1,6 +1,7 @@
-#include "input_thread.hh"
+#include "input/input.hh"
 #include <raylib.h>
-#include <thread>
+#include <rigtorp/SPSCQueue.h>
+#include <spdlog/spdlog.h>
 
 
 int main() {
@@ -12,15 +13,16 @@ int main() {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   SetWindowState(FLAG_VSYNC_HINT);
 
-  std::jthread input_thread(aer::input_job);
+  aer::InputHandler input_handler(520);
 
   while (!WindowShouldClose()) {
     ClearBackground(BLACK);
     BeginDrawing();
     DrawFPS(10, 10);
     EndDrawing();
+    spdlog::info("{}", input_handler.get_queue().size());
   }
 
-  input_thread.request_stop();
+  input_handler.stop();
   return 0;
 }
