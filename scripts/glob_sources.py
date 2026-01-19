@@ -2,6 +2,9 @@ from pathlib import Path
 import sys
 
 
+print("Populating sources...")
+
+
 def is_in_cmake_folder(p: Path, base_folder: Path):
     for parent in p.parents:
         if parent == base_folder:
@@ -13,7 +16,7 @@ def is_in_cmake_folder(p: Path, base_folder: Path):
 
 # args
 # src = Path(sys.argv[1])
-src = Path("./src/")
+src_list = [Path("./src/"), Path("./lib/")]
 out_name = "sources.cmake"
 extensions = [
     ".c",
@@ -35,27 +38,28 @@ extensions = [
     ".ipp",
 ]
 
-cmake_files = [p for p in src.rglob("CMakeLists.txt") if p.is_file()]
-cmake_folders = [p.parent for p in cmake_files]
+for src in src_list:
+    cmake_files = [p for p in src.rglob("CMakeLists.txt") if p.is_file()]
+    cmake_folders = [p.parent for p in cmake_files]
 
-print("these folders will be affected:\n", cmake_folders)
-if len(sys.argv) > 1 and sys.argv[1] != "-y":
-    _ = sys.stdout.write("proceed? [y/*] ")
-    if input().lower() != "y":
-        print("aborted")
-        exit()
+    print(src, "- these folders will be affected:\n", cmake_folders)
+    if len(sys.argv) > 1 and sys.argv[1] != "-y":
+        _ = sys.stdout.write("proceed? [y/*] ")
+        if input().lower() != "y":
+            print("aborted")
+            exit()
 
-for folder in cmake_folders:
-    source_files = [
-        p.relative_to(folder)
-        for p in folder.rglob("*")
-        if p.suffix.lower() in extensions
-        and p.is_file()
-        and not is_in_cmake_folder(p, folder)
-    ]
+    for folder in cmake_folders:
+        source_files = [
+            p.relative_to(folder)
+            for p in folder.rglob("*")
+            if p.suffix.lower() in extensions
+            and p.is_file()
+            and not is_in_cmake_folder(p, folder)
+        ]
 
-    source_files_str = [str(p) for p in sorted(source_files)]
-    with open(folder / out_name, "w+") as out:
-        _ = out.write("set(SOURCES\n  ")
-        _ = out.write("\n  ".join(source_files_str) + "\n")
-        _ = out.write(")")
+        source_files_str = [str(p) for p in sorted(source_files)]
+        with open(folder / out_name, "w+") as out:
+            _ = out.write("set(SOURCES\n  ")
+            _ = out.write("\n  ".join(source_files_str) + "\n")
+            _ = out.write(")")

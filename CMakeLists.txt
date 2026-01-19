@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10...3.31)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(
-  name
+  aer
   LANGUAGES CXX
 )
 
@@ -16,6 +16,8 @@ FetchContent_Declare(
   EXCLUDE_FROM_ALL
   SYSTEM
 )
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(BUILD_GAMES    OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
   raylib
   GIT_REPOSITORY https://github.com/raysan5/raylib.git
@@ -24,8 +26,9 @@ FetchContent_Declare(
   EXCLUDE_FROM_ALL
   SYSTEM
 )
-
 FetchContent_MakeAvailable(spdlog)
 FetchContent_MakeAvailable(raylib)
 
+add_subdirectory(lib/core)
+add_subdirectory(lib/input)
 add_subdirectory(src)
