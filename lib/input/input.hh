@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include "rigtorp/SPSCQueue.h"
 namespace aer {
 
 
@@ -59,9 +59,9 @@ namespace aer {
      * @brief Loop over all possible inputs and send events to the queue if
      * input is detected
      *
-     * @param queue Input queue. TODO: type is placeholder
+     * @param queue Input queue
      */
-    void poll_input(std::vector<InputEvent> queue) const;
+    void poll_input(rigtorp::SPSCQueue<InputEvent> &queue) const;
   };
 
 

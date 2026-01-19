@@ -16,6 +16,7 @@ FetchContent_Declare(
   EXCLUDE_FROM_ALL
   SYSTEM
 )
+
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(BUILD_GAMES    OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
@@ -26,8 +27,19 @@ FetchContent_Declare(
   EXCLUDE_FROM_ALL
   SYSTEM
 )
+
+FetchContent_Declare(
+  SPSCQueue
+  GIT_REPOSITORY https://github.com/rigtorp/SPSCQueue.git
+  GIT_TAG v1.1
+  GIT_SHALLOW ON
+  EXCLUDE_FROM_ALL
+  SYSTEM
+)
+
 FetchContent_MakeAvailable(spdlog)
 FetchContent_MakeAvailable(raylib)
+FetchContent_MakeAvailable(SPSCQueue)
 
 add_subdirectory(lib/core)
 add_subdirectory(lib/input)

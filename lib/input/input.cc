@@ -12,17 +12,18 @@ double aer::InputHandler::update_epoch() {
 }
 
 
-void aer::InputHandler::poll_input(std::vector<InputEvent> queue) const {
+void aer::InputHandler::poll_input(
+    rigtorp::SPSCQueue<InputEvent> &queue) const {
   for (int key = 0; key < 512; key++) {
     if (IsKeyPressed(key)) {
-      queue.push_back(InputEvent{
+      queue.try_push(InputEvent{
           InputControllerKind::KEY,
           InputEventKind::PRESSED,
           key,
           GetTime() * 1000 - epoch,
       });
     } else if (IsKeyReleased(key)) {
-      queue.push_back(InputEvent{
+      queue.try_push(InputEvent{
           InputControllerKind::KEY,
           InputEventKind::RELEASED,
           key,
@@ -33,14 +34,14 @@ void aer::InputHandler::poll_input(std::vector<InputEvent> queue) const {
 
   for (int mouse = 0; mouse < 8; mouse++) {
     if (IsMouseButtonPressed(mouse)) {
-      queue.push_back(InputEvent{
+      queue.try_push(InputEvent{
           InputControllerKind::MOUSE,
-          InputEventKind::PRESSED,
+          InputEventKind::RELEASED,
           mouse,
           GetTime() * 1000 - epoch,
       });
     } else if (IsMouseButtonPressed(mouse)) {
-      queue.push_back(InputEvent{
+      queue.try_push(InputEvent{
           InputControllerKind::MOUSE,
           InputEventKind::RELEASED,
           mouse,
