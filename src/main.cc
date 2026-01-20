@@ -1,10 +1,15 @@
 #include "input/input.hh"
+#include "input/linux_x11.hh"
 #include <raylib.h>
 #include <rigtorp/SPSCQueue.h>
 #include <spdlog/spdlog.h>
 
 
 int main() {
+#ifdef AER_HAS_X11
+  aer::init_for_input_x11_adapter();
+#endif // AER_HAS_X11
+
   ChangeDirectory(GetApplicationDirectory());
   SetTraceLogLevel(LOG_WARNING);
 
@@ -13,7 +18,11 @@ int main() {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   SetWindowState(FLAG_VSYNC_HINT);
 
-  aer::InputHandler input_handler(520);
+#ifdef AER_HAS_X11
+  aer::InputHandler<aer::InputX11Adapter> input_handler(520);
+#else
+  aer::InputHandler<aer::InputDefaultAdapter> input_handler(520);
+#endif
 
   while (!WindowShouldClose()) {
     ClearBackground(BLACK);
