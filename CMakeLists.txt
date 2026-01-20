@@ -8,6 +8,8 @@ project(
   LANGUAGES CXX
 )
 
+# FetchContents -------------------------------------------------------------- #
+
 FetchContent_Declare(
   spdlog
   GIT_REPOSITORY https://github.com/gabime/spdlog
@@ -40,6 +42,18 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(spdlog)
 FetchContent_MakeAvailable(raylib)
 FetchContent_MakeAvailable(SPSCQueue)
+
+# OS-dependent libs ---------------------------------------------------------- #
+
+find_package(X11)
+if(X11_FOUND)
+  find_library(XI_LIBRARY Xi)
+  if (XI_LIBRARY)
+    message("X11 + XI2 available")
+    set(AER_HAS_LIB_X11 TRUE)
+    add_compile_definitions(AER_HAS_LIB_X11)
+  endif()
+endif()
 
 add_subdirectory(lib/core)
 add_subdirectory(lib/input)

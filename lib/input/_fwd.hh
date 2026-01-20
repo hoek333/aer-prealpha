@@ -7,4 +7,10 @@ namespace aer {
   struct InputEvent;
   class InputHandler;
 
+#ifdef AER_HAS_LIB_X11
+  class InputX11Adapter;
+#endif
+
+  class InputFallbackAdapter;
+
 } // namespace aer

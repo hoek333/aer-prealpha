@@ -1,3 +1,5 @@
 set(SOURCES
-  _.cc
+  _fwd.hh
+  platform.cc
+  platform.hh
 )

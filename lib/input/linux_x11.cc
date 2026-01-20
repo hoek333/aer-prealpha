@@ -1,8 +1,10 @@
-#ifdef AER_HAS_X11
 #include "input/linux_x11.hh"
+#include <spdlog/spdlog.h>
+#include <stdexcept>
+
+#ifdef AER_HAS_LIB_X11
 #include <X11/Xlib.h>
 #include <X11/extensions/XInput2.h>
-#include <stdexcept>
 namespace aer {
 
 
@@ -37,8 +39,8 @@ namespace aer {
     mask.mask = mask_data;
     XISetMask(mask.mask, XI_RawKeyPress);
     XISetMask(mask.mask, XI_RawKeyRelease);
-    XISetMask(mask.mask, XI_ButtonPress);
-    XISetMask(mask.mask, XI_ButtonRelease);
+    XISetMask(mask.mask, XI_RawButtonPress);
+    XISetMask(mask.mask, XI_RawButtonRelease);
     XISelectEvents(pimpl->display, DefaultRootWindow(pimpl->display), &mask, 1);
     // flush
     XFlush(pimpl->display);
@@ -53,25 +55,46 @@ namespace aer {
 
     XNextEvent(pimpl->display, &ev);
     auto t = clock.now();
-    double ts =
+    double timestamp =
         std::chrono::duration<double, std::milli>(t.time_since_epoch()).count();
 
     if (!XGetEventData(pimpl->display, cookie)) return;
-    if (cookie->evtype == XI_RawKeyPress) {
+    switch (cookie->evtype) {
+    case XI_RawKeyPress:
       queue.try_push(InputEvent{
           InputControllerKind::KEY,
           InputEventKind::PRESSED,
-          1, // TODO: provide the key code but for real
-          ts,
+          static_cast<XIRawEvent *>(cookie->data)->detail,
+          timestamp,
       });
-    }
-    if (cookie->evtype == XI_RawKeyRelease) {
+      break;
+
+    case XI_RawKeyRelease:
       queue.try_push(InputEvent{
           InputControllerKind::KEY,
           InputEventKind::RELEASED,
-          1,
-          ts,
+          static_cast<XIRawEvent *>(cookie->data)->detail,
+          timestamp,
       });
+      break;
+
+    case XI_RawButtonPress:
+      queue.try_push(InputEvent{
+          InputControllerKind::MOUSE,
+          InputEventKind::PRESSED,
+          static_cast<XIRawEvent *>(cookie->data)->detail,
+          timestamp,
+      });
+      break;
+
+    case XI_RawButtonRelease:
+      queue.try_push(InputEvent{
+          InputControllerKind::MOUSE,
+          InputEventKind::RELEASED,
+          static_cast<XIRawEvent *>(cookie->data)->detail,
+          timestamp,
+      });
+      break;
     }
 
     XFreeEventData(pimpl->display, cookie);
@@ -79,11 +102,11 @@ namespace aer {
 
 
   InputX11Adapter::~InputX11Adapter() {
-    if (pimpl->display) {
+    if (pimpl && pimpl->display) {
       XCloseDisplay(pimpl->display);
     }
   }
 
 
 } // namespace aer
-#endif // AER_HAS_X11
+#endif // AER_HAS_LIB_X11

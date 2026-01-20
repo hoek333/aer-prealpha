@@ -1,14 +1,28 @@
+#include "core/platform.hh"
+#include "input/fallback.hh"
 #include "input/input.hh"
 #include "input/linux_x11.hh"
+#include <memory>
 #include <raylib.h>
 #include <rigtorp/SPSCQueue.h>
 #include <spdlog/spdlog.h>
 
 
 int main() {
-#ifdef AER_HAS_X11
-  aer::init_for_input_x11_adapter();
-#endif // AER_HAS_X11
+  aer::Platform platform = aer::detect_platform();
+
+  aer::InputHandler input_handler(512);
+  if (platform == aer::Platform::LINUX_X11) {
+#ifdef AER_HAS_LIB_X11
+    aer::init_for_input_x11_adapter();
+    input_handler.set_adapter(std::make_unique<aer::InputX11Adapter>());
+#else
+    input_handler.set_adapter(std::make_unique<aer::InputFallbackAdapter>());
+#endif
+  } else {
+    input_handler.set_adapter(std::make_unique<aer::InputFallbackAdapter>());
+  }
+  input_handler.start_polling();
 
   ChangeDirectory(GetApplicationDirectory());
   SetTraceLogLevel(LOG_WARNING);
@@ -18,20 +32,20 @@ int main() {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   SetWindowState(FLAG_VSYNC_HINT);
 
-#ifdef AER_HAS_X11
-  aer::InputHandler<aer::InputX11Adapter> input_handler(520);
-#else
-  aer::InputHandler<aer::InputDefaultAdapter> input_handler(520);
-#endif
-
   while (!WindowShouldClose()) {
+    // placeholder
+    aer::InputEvent *ie = input_handler.get_queue().front();
+    if (ie != nullptr) {
+      spdlog::info("input event: {}", ie->code);
+      input_handler.get_queue().pop();
+    }
+
     ClearBackground(BLACK);
     BeginDrawing();
     DrawFPS(10, 10);
     EndDrawing();
-    spdlog::info("{}", input_handler.get_queue().size());
   }
 
-  input_handler.stop();
+  input_handler.stop_thread();
   return 0;
 }

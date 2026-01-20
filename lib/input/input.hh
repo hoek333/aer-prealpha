@@ -1,11 +1,8 @@
 #pragma once
 #include <atomic>
 #include <chrono>
-#include <concepts>
-#include <ratio>
 #include <rigtorp/SPSCQueue.h>
 #include <thread>
-#include <type_traits>
 namespace aer {
 
 
@@ -35,13 +32,11 @@ namespace aer {
   };
 
 
-  template <class T>
-  concept IsInputPlatformAdapter =
-      requires(T t, rigtorp::SPSCQueue<InputEvent> &queue,
-               const std::chrono::steady_clock &clock) {
-        { t.poll_input(queue, clock) } -> std::same_as<void>;
-      } //
-      && std::is_default_constructible_v<T>;
+  class InputPlatformAdapter {
+  public:
+    virtual void poll_input(rigtorp::SPSCQueue<InputEvent> &queue,
+                            const std::chrono::steady_clock &clock) = 0;
+  };
 
 
   /**
@@ -54,41 +49,26 @@ namespace aer {
    * (zero-time) at any point in time. By default, the epoch is the time at
    * which the instance has been constructed.
    *
-   * @thread-safe. Construct this on the main thread. Input events must never be
+   * @thread-safe Construct this on the main thread. Input events must never be
    * enqueued from the main thread.
-   *
-   * @tparam InputPlatformAdapter OS-specific input polling device
    */
-  template <class InputPlatformAdapter>
-    requires IsInputPlatformAdapter<InputPlatformAdapter>
   class InputHandler {
     std::chrono::steady_clock clock; // inner clock
     std::atomic<double> epoch;       // zero-time that timestamps reference (ms)
-    rigtorp::SPSCQueue<InputEvent> queue; // InputEvent queue
-    InputPlatformAdapter adapter;         // OS adapter
-    std::jthread thread;                  // poll thread
+    rigtorp::SPSCQueue<InputEvent> queue;          // InputEvent queue
+    std::unique_ptr<InputPlatformAdapter> adapter; // OS adapter
+    std::jthread thread;                           // input thread
+    std::atomic<bool> polling = false; // true: poll input. false: do not
 
   private:
     /**
      * @brief Job executed by the input thread
      * @param stop thread stop token
      */
-    void run(std::stop_token stop) {
-      while (!stop.stop_requested()) {
-        adapter.poll_input(queue, clock);
-      }
-    }
+    void run(std::stop_token stop);
 
   public:
-    InputHandler(size_t queue_size)
-        : clock()
-        , epoch()
-        , queue(queue_size)
-        , adapter()
-        , thread() {
-      reset_epoch();
-      thread = std::jthread(&InputHandler::run, this);
-    }
+    InputHandler(size_t queue_size);
 
     /**
      * @brief Get the handler's queue.
@@ -97,12 +77,6 @@ namespace aer {
      * @return Reference to the input queue
      */
     rigtorp::SPSCQueue<InputEvent> &get_queue() { return queue; }
-
-    /**
-     * @brief Get the underlying platform device.
-     * @return Reference to the platform adapter device.
-     */
-    const InputPlatformAdapter &get_adapter() const { return adapter; }
 
     /**
      * @brief Get the handler's epoch in milliseconds (relative to the
@@ -116,17 +90,32 @@ namespace aer {
      * @brief Set the handler's epoch to the current time.
      * @return New epoch in ms
      */
-    double reset_epoch() {
-      auto t = clock.now();
-      epoch = std::chrono::duration<double, std::milli>(t.time_since_epoch())
-                  .count();
-      return epoch;
+    double reset_epoch();
+
+    /**
+     * @brief Set the handler's adapter. You must do this before you begin
+     * polling, otherwise the thing will not do anything.
+     * @param adapter Adapter that the handler should use. Will be moved.
+     *
+     * @thread-safe This is not thread-safe. Do not change the adapter while
+     * polling.
+     */
+    void set_adapter(std::unique_ptr<InputPlatformAdapter> adapter) {
+      this->adapter = std::move(adapter);
     }
+
+    /**
+     * @brief Return the polling status of the handler
+     * @return true if currently polling input, false if not
+     */
+    bool is_polling() const { return polling; }
+    void start_polling() { polling = true; }
+    void pause_polling() { polling = false; }
 
     /**
      * @brief Stop the input thread. This instance will become useless.
      */
-    void stop() { thread.request_stop(); }
+    void stop_thread() { thread.request_stop(); }
   };
 
 

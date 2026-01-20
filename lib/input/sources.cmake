@@ -2,6 +2,7 @@ set(SOURCES
   _fwd.hh
   fallback.cc
   fallback.hh
+  input.cc
   input.hh
   key.hh
   linux_x11.cc
