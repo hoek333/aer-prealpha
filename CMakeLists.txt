@@ -45,13 +45,23 @@ FetchContent_MakeAvailable(SPSCQueue)
 
 # OS-dependent libs ---------------------------------------------------------- #
 
-find_package(X11)
-if(X11_FOUND)
-  find_library(XI_LIBRARY Xi)
-  if (XI_LIBRARY)
-    message("X11 + XI2 available")
-    set(AER_HAS_LIB_X11 TRUE)
-    add_compile_definitions(AER_HAS_LIB_X11)
+if(LINUX)
+  message("Detected platform: LINUX")
+  find_package(X11)
+
+  if(X11_FOUND)
+    find_library(XI_LIBRARY Xi)
+
+    if (XI_LIBRARY)
+      message("X11 + XI2 available")
+      set(AER_HAS_LIB_X11 TRUE)
+      add_compile_definitions(AER_HAS_LIB_X11)
+    else()
+      message("XI2 not found")
+    endif()
+
+  else()
+    message("X11 not found")
   endif()
 endif()
 

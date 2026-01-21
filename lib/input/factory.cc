@@ -13,9 +13,13 @@ aer::create_input_handler(size_t queue_size) {
 
   switch (platform) {
   case Platform::LINUX_X11:
+#if defined(__linux__)
 #ifdef AER_HAS_LIB_X11
     aer::init_for_input_x11_adapter();
     ret->set_adapter(std::make_unique<InputX11Adapter>());
+#else
+    ret->set_adapter(std::make_unique<aer::InputFallbackAdapter>());
+#endif
 #else
     ret->set_adapter(std::make_unique<aer::InputFallbackAdapter>());
 #endif

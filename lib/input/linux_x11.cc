@@ -2,6 +2,7 @@
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 
+#if defined(__linux__)
 #ifdef AER_HAS_LIB_X11
 #include <X11/Xlib.h>
 #include <X11/extensions/XInput2.h>
@@ -116,3 +117,4 @@ namespace aer {
 
 } // namespace aer
 #endif // AER_HAS_LIB_X11
+#endif // __linux__

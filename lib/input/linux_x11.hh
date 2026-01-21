@@ -1,6 +1,8 @@
 #pragma once
 #include "input/input.hh"
 #include <rigtorp/SPSCQueue.h>
+
+#if defined(__linux__)
 #ifdef AER_HAS_LIB_X11
 namespace aer {
 
@@ -45,3 +47,4 @@ namespace aer {
 
 } // namespace aer
 #endif // AER_HAS_LIB_X11
+#endif // __linux__
