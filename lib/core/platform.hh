@@ -5,7 +5,6 @@ namespace aer {
   enum struct Platform {
     UNKNOWN = 0,
     LINUX_X11,
-    LINUX_WAYLAND,
     WINDOWS,
   };
 

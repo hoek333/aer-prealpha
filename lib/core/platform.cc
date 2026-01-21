@@ -18,12 +18,8 @@ bool aer::is_wayland_available() {
 
 aer::Platform aer::detect_platform() {
 #if defined(__linux__)
-  bool x11 = is_x11_available();
-  bool wayland = is_wayland_available();
-  if (x11) {
+  if (is_x11_available()) {
     return Platform::LINUX_X11;
-  } else if (wayland) {
-    return Platform::LINUX_WAYLAND;
   } else {
     return Platform::UNKNOWN;
   }
