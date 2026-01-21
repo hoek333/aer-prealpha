@@ -1,11 +1,10 @@
-#include "input/linux_x11.hh"
-#include <spdlog/spdlog.h>
-#include <stdexcept>
-
 #if defined(__linux__)
 #ifdef AER_HAS_LIB_X11
+#include "input/linux_x11.hh"
 #include <X11/Xlib.h>
 #include <X11/extensions/XInput2.h>
+#include <spdlog/spdlog.h>
+#include <stdexcept>
 namespace aer {
 
 

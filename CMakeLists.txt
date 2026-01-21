@@ -65,6 +65,10 @@ if(LINUX)
   endif()
 endif()
 
+if(WIN32)
+  message("Detected platform: WINDOWS")
+endif()
+
 add_subdirectory(lib/core)
 add_subdirectory(lib/input)
 add_subdirectory(src)

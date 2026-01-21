@@ -21,3 +21,5 @@ CMakeUserPresets.json
 .cache/
 build*/
 bin*/
+
+.clangd
