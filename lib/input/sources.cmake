@@ -1,5 +1,7 @@
 set(SOURCES
   _fwd.hh
+  factory.cc
+  factory.hh
   fallback.cc
   fallback.hh
   input.cc
