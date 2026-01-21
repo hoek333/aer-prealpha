@@ -110,6 +110,13 @@ namespace aer {
      * @return true if currently polling input, false if not
      */
     bool is_polling() const { return polling; }
+
+    /**
+     * @brief It is best to start polling after the raylib window has been
+     * created. For the time being you can start polling before the window
+     * creation, but we have no guarantee that this behavior will stick in
+     * future Raylib versions.
+     */
     void start_polling() { polling = true; }
     void pause_polling() { polling = false; }
 
