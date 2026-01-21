@@ -24,6 +24,9 @@ namespace aer {
     struct Impl;
     std::unique_ptr<Impl> pimpl;
 
+  private:
+    bool x11_is_raylib_window_focused();
+
   public:
     InputX11Adapter();
     ~InputX11Adapter();
@@ -35,7 +38,8 @@ namespace aer {
     InputX11Adapter &operator=(InputX11Adapter &&) noexcept = default;
 
     void poll_input(rigtorp::SPSCQueue<InputEvent> &queue,
-                    const std::chrono::steady_clock &clock);
+                    const std::chrono::steady_clock &clock,
+                    const std::atomic<double> &epoch);
   };
 
 

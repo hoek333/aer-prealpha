@@ -1,10 +1,11 @@
 #include "input/input.hh"
+#include <raylib.h>
 
 
 void aer::InputHandler::run(std::stop_token stop) {
   while (!stop.stop_requested()) {
     if (adapter != nullptr && polling) {
-      adapter->poll_input(queue, clock);
+      adapter->poll_input(queue, clock, epoch);
     }
   }
 }

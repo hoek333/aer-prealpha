@@ -48,15 +48,21 @@ namespace aer {
 
 
   void InputX11Adapter::poll_input(rigtorp::SPSCQueue<InputEvent> &queue,
-                                   const std::chrono::steady_clock &clock) {
+                                   const std::chrono::steady_clock &clock,
+                                   const std::atomic<double> &epoch) {
     XEvent ev;
     XGenericEventCookie *cookie = &ev.xcookie;
     if (XPending(pimpl->display) == 0) return;
 
     XNextEvent(pimpl->display, &ev);
+    if (!x11_is_raylib_window_focused()) {
+      return; // discard event if window is not focused
+    }
     auto t = clock.now();
     double timestamp =
-        std::chrono::duration<double, std::milli>(t.time_since_epoch()).count();
+        std::chrono::duration<double, std::milli>(t.time_since_epoch())
+            .count() -
+        epoch;
 
     if (!XGetEventData(pimpl->display, cookie)) return;
     switch (cookie->evtype) {

@@ -36,7 +36,7 @@ int main() {
     // placeholder
     aer::InputEvent *ie = input_handler.get_queue().front();
     if (ie != nullptr) {
-      spdlog::info("input event: {}", ie->code);
+      spdlog::info("input event: {}", ie->timestamp);
       input_handler.get_queue().pop();
     }
 

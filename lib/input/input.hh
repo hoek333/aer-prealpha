@@ -35,7 +35,8 @@ namespace aer {
   class InputPlatformAdapter {
   public:
     virtual void poll_input(rigtorp::SPSCQueue<InputEvent> &queue,
-                            const std::chrono::steady_clock &clock) = 0;
+                            const std::chrono::steady_clock &clock,
+                            const std::atomic<double> &epoch) = 0;
   };
 
 
