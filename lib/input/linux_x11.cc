@@ -1,6 +1,7 @@
 #if defined(__linux__)
 #ifdef AER_HAS_LIB_X11
 #include "input/linux_x11.hh"
+#include "input/_utils.hh"
 #include <X11/Xlib.h>
 #include <X11/extensions/XInput2.h>
 #include <spdlog/spdlog.h>
@@ -52,58 +53,61 @@ namespace aer {
                                    const std::atomic<double> &epoch) {
     XEvent ev;
     XGenericEventCookie *cookie = &ev.xcookie;
-    if (XPending(pimpl->display) == 0) return;
+    while (XPending(pimpl->display) > 0) {
+      XNextEvent(pimpl->display, &ev);
 
-    XNextEvent(pimpl->display, &ev);
-    if (!x11_is_raylib_window_focused()) {
-      return; // discard event if window is not focused
+      // timestamp
+      auto t = clock.now();
+      double timestamp =
+          std::chrono::duration<double, std::milli>(t.time_since_epoch())
+              .count() -
+          epoch;
+
+      if (!is_raylib_window_focused()) {
+        continue; // discard event if window is not focused
+      }
+
+      if (!XGetEventData(pimpl->display, cookie)) continue;
+      switch (cookie->evtype) {
+      case XI_RawKeyPress:
+        queue.try_push(InputEvent{
+            InputControllerKind::KEY,
+            InputEventKind::PRESSED,
+            static_cast<XIRawEvent *>(cookie->data)->detail,
+            timestamp,
+        });
+        break;
+
+      case XI_RawKeyRelease:
+        queue.try_push(InputEvent{
+            InputControllerKind::KEY,
+            InputEventKind::RELEASED,
+            static_cast<XIRawEvent *>(cookie->data)->detail,
+            timestamp,
+        });
+        break;
+
+      case XI_RawButtonPress:
+        queue.try_push(InputEvent{
+            InputControllerKind::MOUSE,
+            InputEventKind::PRESSED,
+            static_cast<XIRawEvent *>(cookie->data)->detail,
+            timestamp,
+        });
+        break;
+
+      case XI_RawButtonRelease:
+        queue.try_push(InputEvent{
+            InputControllerKind::MOUSE,
+            InputEventKind::RELEASED,
+            static_cast<XIRawEvent *>(cookie->data)->detail,
+            timestamp,
+        });
+        break;
+      }
+
+      XFreeEventData(pimpl->display, cookie);
     }
-    auto t = clock.now();
-    double timestamp =
-        std::chrono::duration<double, std::milli>(t.time_since_epoch())
-            .count() -
-        epoch;
-
-    if (!XGetEventData(pimpl->display, cookie)) return;
-    switch (cookie->evtype) {
-    case XI_RawKeyPress:
-      queue.try_push(InputEvent{
-          InputControllerKind::KEY,
-          InputEventKind::PRESSED,
-          static_cast<XIRawEvent *>(cookie->data)->detail,
-          timestamp,
-      });
-      break;
-
-    case XI_RawKeyRelease:
-      queue.try_push(InputEvent{
-          InputControllerKind::KEY,
-          InputEventKind::RELEASED,
-          static_cast<XIRawEvent *>(cookie->data)->detail,
-          timestamp,
-      });
-      break;
-
-    case XI_RawButtonPress:
-      queue.try_push(InputEvent{
-          InputControllerKind::MOUSE,
-          InputEventKind::PRESSED,
-          static_cast<XIRawEvent *>(cookie->data)->detail,
-          timestamp,
-      });
-      break;
-
-    case XI_RawButtonRelease:
-      queue.try_push(InputEvent{
-          InputControllerKind::MOUSE,
-          InputEventKind::RELEASED,
-          static_cast<XIRawEvent *>(cookie->data)->detail,
-          timestamp,
-      });
-      break;
-    }
-
-    XFreeEventData(pimpl->display, cookie);
   }
 
 

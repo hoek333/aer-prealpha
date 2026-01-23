@@ -23,3 +23,7 @@ if(AER_HAS_LIB_X11)
   target_link_libraries(${NAME} PUBLIC X11::X11 X11::Xi)
 endif()
 endif()
+
+if(WIN32)
+  target_link_libraries(${NAME} PUBLIC comctl32)
+endif()

@@ -67,6 +67,7 @@ endif()
 
 if(WIN32)
   message("Detected platform: WINDOWS")
+  add_link_options(-static -static-libgcc -static-libstdc++)
 endif()
 
 add_subdirectory(lib/core)

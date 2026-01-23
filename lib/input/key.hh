@@ -1,10 +1,9 @@
 #pragma once
 #include <cstdint>
-#include <raylib.h>
 namespace aer {
 
 
-  /*
+  /**
    * @class Key
    * @brief Keyboard Key keycode enum. The underlying values correspond to X11
    * physical keycodes. All keys except for the japanese and korean ones are
@@ -157,5 +156,24 @@ namespace aer {
     HANGUL_HANJA = 131,
   };
 
+  /**
+   * @class Key
+   * @brief Mouse button enum. The associated values are all based on X11's
+   * conventions, except for X1 and X2 where the number is not standardized.
+   * Wheel movement is not quantified. WHEEL_UP and WHEEL_DOWN represent a
+   * movement of the wheel:
+   *   - WHEEL_UP: wheel turns away from the user
+   *   - WHEEL_DOWN: wheel turns towards the user
+   *
+   */
+  enum struct Button : uint8_t {
+    LEFT = 1,       /// left click
+    RIGHT = 3,      /// right click
+    MIDDLE = 2,     /// middle click
+    X1 = 8,         /// back
+    X2 = 9,         /// forward
+    WHEEL_UP = 4,   /// wheel + (away)
+    WHEEL_DOWN = 5, /// wheel - (towards)
+  };
 
 } // namespace aer

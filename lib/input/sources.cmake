@@ -1,5 +1,7 @@
 set(SOURCES
   _fwd.hh
+  _utils.cc
+  _utils.hh
   factory.cc
   factory.hh
   fallback.cc
@@ -9,6 +11,6 @@ set(SOURCES
   key.hh
   linux_x11.cc
   linux_x11.hh
-  linux_x11_raylib.cc
+  windows.cc
   windows.hh
 )

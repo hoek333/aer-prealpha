@@ -8,7 +8,6 @@
 
 int main() {
   auto input_handler = aer::create_input_handler(512);
-  input_handler->start_polling();
 
   ChangeDirectory(GetApplicationDirectory());
   SetTraceLogLevel(LOG_WARNING);
@@ -18,11 +17,13 @@ int main() {
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   SetWindowState(FLAG_VSYNC_HINT);
 
+  input_handler->start_polling();
+
   while (!WindowShouldClose()) {
     // placeholder
     aer::InputEvent *ie = input_handler->get_queue().front();
     if (ie != nullptr) {
-      spdlog::info("input timestamp: {}", ie->timestamp);
+      spdlog::info("input timestamp: {} ({})", ie->timestamp, ie->code);
       input_handler->get_queue().pop();
     }
 
