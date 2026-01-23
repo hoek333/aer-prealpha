@@ -23,7 +23,14 @@ int main() {
     // placeholder
     aer::InputEvent *ie = input_handler->get_queue().front();
     if (ie != nullptr) {
-      spdlog::info("input timestamp: {} ({})", ie->timestamp, ie->code);
+      bool kind;
+      if (ie->kind == aer::InputEventKind::PRESSED) {
+        kind = true;
+      } else {
+        kind = false;
+      }
+      spdlog::info("input timestamp: {} ({}/{})", ie->timestamp, ie->code,
+                   kind);
       input_handler->get_queue().pop();
     }
 

@@ -1,7 +1,8 @@
+#include "input/key.hh"
 #if defined(__linux__)
 #ifdef AER_HAS_LIB_X11
-#include "input/adapter_linux_x11.hh"
 #include "input/_utils.hh"
+#include "input/adapter_linux_x11.hh"
 #include <X11/Xlib.h>
 #include <X11/extensions/XInput2.h>
 #include <spdlog/spdlog.h>
@@ -68,12 +69,14 @@ namespace aer {
       }
 
       if (!XGetEventData(pimpl->display, cookie)) continue;
+      uint8_t scancode =
+          static_cast<uint8_t>(static_cast<XIRawEvent *>(cookie->data)->detail);
       switch (cookie->evtype) {
       case XI_RawKeyPress:
         queue.try_push(InputEvent{
             InputControllerKind::KEY,
             InputEventKind::PRESSED,
-            static_cast<XIRawEvent *>(cookie->data)->detail,
+            scancode,
             timestamp,
         });
         break;
@@ -82,7 +85,7 @@ namespace aer {
         queue.try_push(InputEvent{
             InputControllerKind::KEY,
             InputEventKind::RELEASED,
-            static_cast<XIRawEvent *>(cookie->data)->detail,
+            scancode,
             timestamp,
         });
         break;
@@ -91,16 +94,20 @@ namespace aer {
         queue.try_push(InputEvent{
             InputControllerKind::MOUSE,
             InputEventKind::PRESSED,
-            static_cast<XIRawEvent *>(cookie->data)->detail,
+            scancode,
             timestamp,
         });
         break;
 
       case XI_RawButtonRelease:
+        if (scancode == (uint8_t)Button::WHEEL_UP ||
+            scancode == (uint8_t)Button::WHEEL_DOWN) {
+          break;
+        }
         queue.try_push(InputEvent{
             InputControllerKind::MOUSE,
             InputEventKind::RELEASED,
-            static_cast<XIRawEvent *>(cookie->data)->detail,
+            scancode,
             timestamp,
         });
         break;

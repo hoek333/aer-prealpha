@@ -15,7 +15,7 @@ namespace aer {
   enum struct Key : uint8_t {
     NONE = 0,
 
-    GRAVE = 9, // NOTE: probably wrong? have to double check
+    GRAVE = 49, // NOTE: probably wrong? have to double check
     ONE = 10,
     TWO = 11,
     THREE = 12,
