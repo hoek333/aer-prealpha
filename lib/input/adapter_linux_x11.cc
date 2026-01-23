@@ -1,6 +1,6 @@
 #if defined(__linux__)
 #ifdef AER_HAS_LIB_X11
-#include "input/linux_x11.hh"
+#include "input/adapter_linux_x11.hh"
 #include "input/_utils.hh"
 #include <X11/Xlib.h>
 #include <X11/extensions/XInput2.h>

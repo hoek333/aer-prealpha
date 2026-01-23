@@ -27,8 +27,8 @@ namespace aer {
   struct InputEvent {
     InputControllerKind controller;
     InputEventKind kind;
-    unsigned int code; // corresponds to a Key enum if keyboard event; Mouse
-                       // enum if mouse event
+    uint8_t code;     // corresponds to a Key enum if keyboard event; Mouse
+                      // enum if mouse event
     double timestamp; // in milliseconds
   };
 

@@ -1,9 +1,9 @@
 #include "input/factory.hh"
 #include "core/platform.hh"
-#include "input/fallback.hh"
+#include "input/adapter_fallback.hh"
+#include "input/adapter_linux_x11.hh"
+#include "input/adapter_windows.hh"
 #include "input/input.hh"
-#include "input/linux_x11.hh"
-#include "input/windows.hh"
 #include <memory>
 
 

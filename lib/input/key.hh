@@ -13,7 +13,9 @@ namespace aer {
    *
    */
   enum struct Key : uint8_t {
-    GRAVE = 0,
+    NONE = 0,
+
+    GRAVE = 9, // NOTE: probably wrong? have to double check
     ONE = 10,
     TWO = 11,
     THREE = 12,
@@ -114,7 +116,7 @@ namespace aer {
     INSERT = 118,
     HOME = 110,
     PAGE_UP = 112,
-    DELETE = 119,
+    DELETE_ = 119,
     END = 115,
     PAGE_DOWN = 117,
 
@@ -156,6 +158,7 @@ namespace aer {
     HANGUL_HANJA = 131,
   };
 
+
   /**
    * @class Key
    * @brief Mouse button enum. The associated values are all based on X11's
@@ -175,5 +178,6 @@ namespace aer {
     WHEEL_UP = 4,   /// wheel + (away)
     WHEEL_DOWN = 5, /// wheel - (towards)
   };
+
 
 } // namespace aer

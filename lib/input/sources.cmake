@@ -2,15 +2,15 @@ set(SOURCES
   _fwd.hh
   _utils.cc
   _utils.hh
+  adapter_fallback.cc
+  adapter_fallback.hh
+  adapter_linux_x11.cc
+  adapter_linux_x11.hh
+  adapter_windows.cc
+  adapter_windows.hh
   factory.cc
   factory.hh
-  fallback.cc
-  fallback.hh
   input.cc
   input.hh
   key.hh
-  linux_x11.cc
-  linux_x11.hh
-  windows.cc
-  windows.hh
 )
