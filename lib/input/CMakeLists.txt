@@ -1,5 +1,6 @@
 include(sources.cmake)
 
+# input handling
 set(NAME input)
 add_library(${NAME} ${SOURCES})
 target_compile_features(${NAME} PUBLIC cxx_std_20)
