@@ -8,6 +8,8 @@ namespace aer {
   /**
    * @brief Automatically detect platform and create an input handler with
    * the corresponding adapter.
+   * @warning This function must be called before the raylib window is
+   * initialized
    *
    * @param queue_size Size of the input queue
    */

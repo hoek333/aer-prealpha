@@ -97,7 +97,7 @@ namespace aer {
     /**
      * @brief Set the handler's adapter. You must do this before you begin
      * polling, otherwise the thing will not do anything.
-     * @param adapter Adapter that the handler should use. Will be moved.
+     * @param adapter Adapter that the handler should use
      *
      * @thread-safe This is not thread-safe. Do not change the adapter while
      * polling.
