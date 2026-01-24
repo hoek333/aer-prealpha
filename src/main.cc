@@ -1,6 +1,5 @@
 #include "input/factory.hh"
 #include "input/input.hh"
-#include "input/key.hh"
 #include <memory>
 #include <raylib.h>
 #include <rigtorp/SPSCQueue.h>
