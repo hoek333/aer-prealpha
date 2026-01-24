@@ -122,6 +122,14 @@ namespace aer {
     void pause_polling() { polling = false; }
 
     /**
+     * @brief Consume all events older than the current time. You will typically
+     * call this function at the beginning of every frame.
+     * @return A vector containing all the consumed events. They are sorted from
+     * oldest to newest.
+     */
+    std::vector<InputEvent> consume_events();
+
+    /**
      * @brief Stop the input thread. This instance will become useless.
      */
     void stop_thread() { thread.request_stop(); }

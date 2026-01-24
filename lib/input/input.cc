@@ -1,4 +1,6 @@
 #include "input/input.hh"
+#include "input/_utils.hh"
+#include <algorithm>
 #include <raylib.h>
 
 
@@ -27,4 +29,22 @@ double aer::InputHandler::reset_epoch() {
   epoch =
       std::chrono::duration<double, std::milli>(t.time_since_epoch()).count();
   return epoch;
+}
+
+
+std::vector<aer::InputEvent> aer::InputHandler::consume_events() {
+  double now = get_now(clock, epoch);
+  std::vector<aer::InputEvent> ret;
+  if (queue.empty()) return ret;
+  ret.reserve(32);
+
+  // consume all events prior to current time
+  while (true) {
+    auto *ie = queue.front();
+    if (ie == nullptr || ie->timestamp > now) break;
+    ret.push_back(*ie);
+    queue.pop();
+  }
+
+  return ret;
 }

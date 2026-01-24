@@ -1,5 +1,6 @@
 #include "input/factory.hh"
 #include "input/input.hh"
+#include "input/key.hh"
 #include <memory>
 #include <raylib.h>
 #include <rigtorp/SPSCQueue.h>
@@ -21,17 +22,15 @@ int main() {
 
   while (!WindowShouldClose()) {
     // placeholder
-    aer::InputEvent *ie = input_handler->get_queue().front();
-    if (ie != nullptr) {
+    auto input_events = input_handler->consume_events();
+    for (const auto &ie : input_events) {
       bool kind;
-      if (ie->kind == aer::InputEventKind::PRESSED) {
+      if (ie.kind == aer::InputEventKind::PRESSED) {
         kind = true;
       } else {
         kind = false;
       }
-      spdlog::info("input timestamp: {} ({}/{})", ie->timestamp, ie->code,
-                   kind);
-      input_handler->get_queue().pop();
+      spdlog::info("input timestamp: {} ({}/{})", ie.timestamp, ie.code, kind);
     }
 
     ClearBackground(BLACK);
