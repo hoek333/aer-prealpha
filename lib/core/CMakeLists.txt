@@ -7,9 +7,3 @@ target_include_directories(
   ${NAME}
   PRIVATE ${CMAKE_SOURCE_DIR}/lib
 )
-target_link_libraries(
-  ${NAME}
-  PUBLIC
-    spdlog
-    raylib
-)
