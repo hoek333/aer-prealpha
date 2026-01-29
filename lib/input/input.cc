@@ -6,15 +6,14 @@
 void aer::InputHandler::run(std::stop_token stop) {
   while (!stop.stop_requested()) {
     if (adapter != nullptr && polling) {
-      adapter->poll_input(queue, clock, epoch);
+      adapter->poll_input(queue, epoch);
     }
   }
 }
 
 
 aer::InputHandler::InputHandler(size_t queue_size)
-    : clock()
-    , epoch()
+    : epoch()
     , queue(queue_size)
     , adapter()
     , thread() {
@@ -23,16 +22,11 @@ aer::InputHandler::InputHandler(size_t queue_size)
 }
 
 
-double aer::InputHandler::reset_epoch() {
-  auto t = clock.now();
-  epoch =
-      std::chrono::duration<double, std::milli>(t.time_since_epoch()).count();
-  return epoch;
-}
+double aer::InputHandler::reset_epoch() { return get_now(0); }
 
 
 std::vector<aer::InputEvent> aer::InputHandler::consume_events() {
-  double now = get_now(clock, epoch);
+  double now = get_now(epoch);
   std::vector<aer::InputEvent> ret;
   if (queue.empty()) return ret;
   ret.reserve(32);

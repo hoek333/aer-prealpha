@@ -36,7 +36,6 @@ namespace aer {
   class InputPlatformAdapter {
   public:
     virtual void poll_input(rigtorp::SPSCQueue<InputEvent> &queue,
-                            const std::chrono::steady_clock &clock,
                             const std::atomic<double> &epoch) = 0;
   };
 
@@ -55,8 +54,7 @@ namespace aer {
    * enqueued from the main thread.
    */
   class InputHandler {
-    std::chrono::steady_clock clock; // inner clock
-    std::atomic<double> epoch;       // zero-time that timestamps reference (ms)
+    std::atomic<double> epoch; // zero-time that timestamps reference (ms)
     rigtorp::SPSCQueue<InputEvent> queue;          // InputEvent queue
     std::unique_ptr<InputPlatformAdapter> adapter; // OS adapter
     std::jthread thread;                           // input thread

@@ -8,8 +8,8 @@
 bool aer::is_raylib_window_focused() { return IsWindowFocused(); }
 
 
-double aer::get_now(const std::chrono::steady_clock &clock, double epoch) {
-  auto t = clock.now();
+double aer::get_now(double epoch) {
+  auto t = std::chrono::steady_clock::now();
   return std::chrono::duration<double, std::milli>(t.time_since_epoch())
              .count() -
          epoch;

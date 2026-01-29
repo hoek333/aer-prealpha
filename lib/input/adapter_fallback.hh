@@ -8,7 +8,6 @@ namespace aer {
   public:
     InputFallbackAdapter();
     void poll_input([[maybe_unused]] rigtorp::SPSCQueue<InputEvent> &queue,
-                    [[maybe_unused]] const std::chrono::steady_clock &clock,
                     [[maybe_unused]] const std::atomic<double> &epoch);
   };
 

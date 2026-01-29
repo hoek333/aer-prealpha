@@ -19,7 +19,6 @@ namespace aer {
     ~InputWindowsAdapter();
 
     void poll_input(rigtorp::SPSCQueue<InputEvent> &queue,
-                    const std::chrono::steady_clock &clock,
                     const std::atomic<double> &epoch);
   };
 

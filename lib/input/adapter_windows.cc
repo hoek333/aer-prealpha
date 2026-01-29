@@ -14,7 +14,6 @@ namespace {
 
   struct CallbackCtx {
     rigtorp::SPSCQueue<InputEvent> *queue;
-    const std::chrono::steady_clock *clock;
     const std::atomic<double> *epoch;
     bool kb_state[256] =
         {}; // keyboard state
@@ -39,11 +38,7 @@ namespace {
     }
 
     // timestamp
-    auto t = ctx->clock->now();
-    double timestamp =
-        std::chrono::duration<double, std::milli>(t.time_since_epoch())
-            .count() -
-        *ctx->epoch;
+    double timestamp = get_now(*ctx->epoch);
 
     // process msg
     if (msg != WM_INPUT) {
@@ -440,13 +435,12 @@ namespace aer {
 
 
   void InputWindowsAdapter::poll_input(rigtorp::SPSCQueue<InputEvent> &queue,
-                                       const std::chrono::steady_clock &clock,
                                        const std::atomic<double> &epoch) {
 
     // fetch context
     if (!pimpl->ctx) {
-      pimpl->ctx = std::make_unique<CallbackCtx>(
-          CallbackCtx{&queue, &clock, &epoch, {}});
+      pimpl->ctx =
+          std::make_unique<CallbackCtx>(CallbackCtx{&queue, &epoch, {}});
       SetWindowLongPtrW(pimpl->hwnd, GWLP_USERDATA, (LONG_PTR)pimpl->ctx.get());
     }
 

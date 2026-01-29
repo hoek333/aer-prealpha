@@ -16,7 +16,7 @@ namespace aer {
    * @param epoch
    * @return Current timestamp
    */
-  double get_now(const std::chrono::steady_clock &clock, double epoch);
+  double get_now(double epoch);
 
 
 } // namespace aer

@@ -1,8 +1,8 @@
-#include "input/key.hh"
 #if defined(__linux__)
 #ifdef AER_HAS_LIB_X11
-#include "input/_utils.hh"
 #include "input/adapter_linux_x11.hh"
+#include "input/_utils.hh"
+#include "input/key.hh"
 #include <X11/Xlib.h>
 #include <X11/extensions/XInput2.h>
 #include <spdlog/spdlog.h>
@@ -50,7 +50,6 @@ namespace aer {
 
 
   void InputX11Adapter::poll_input(rigtorp::SPSCQueue<InputEvent> &queue,
-                                   const std::chrono::steady_clock &clock,
                                    const std::atomic<double> &epoch) {
     XEvent ev;
     XGenericEventCookie *cookie = &ev.xcookie;
@@ -58,11 +57,7 @@ namespace aer {
       XNextEvent(pimpl->display, &ev);
 
       // timestamp
-      auto t = clock.now();
-      double timestamp =
-          std::chrono::duration<double, std::milli>(t.time_since_epoch())
-              .count() -
-          epoch;
+      double timestamp = get_now(epoch);
 
       if (!is_raylib_window_focused()) {
         continue; // discard event if window is not focused

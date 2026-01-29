@@ -40,7 +40,6 @@ namespace aer {
     InputX11Adapter &operator=(InputX11Adapter &&) noexcept = default;
 
     void poll_input(rigtorp::SPSCQueue<InputEvent> &queue,
-                    const std::chrono::steady_clock &clock,
                     const std::atomic<double> &epoch);
   };
 
