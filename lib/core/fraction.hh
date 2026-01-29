@@ -1,4 +1,5 @@
 #pragma once
+#include <compare>
 #include <cstdint>
 #include <utility>
 namespace aer {
@@ -13,13 +14,13 @@ namespace aer {
    * denominator. The denominator is always positive.
    *
    * @note To preserve numerical stability, the only types that can be used to
-   * perform operations with a Fraction are either int32_t or Fraction.
+   * perform operations with a Fraction are either an integer of size smaller
+   * than 64 bits or Fraction.
    *
    */
   class Fraction {
-    int32_t whole;
-    int32_t num;
-    uint16_t den;
+    int64_t num;
+    int64_t den;
 
   private:
     /**
@@ -28,29 +29,34 @@ namespace aer {
     void reduce();
 
   public:
-    Fraction(uint32_t whole, uint32_t num, uint32_t den);
-    Fraction(uint32_t num, uint32_t den);
+    Fraction();
+    Fraction(int64_t whole, int64_t num, int64_t den);
+    Fraction(int64_t num, int64_t den);
 
     /**
      * @brief Flatten the fraction into a double value.
      * @return Value held by the class, converted to a double.
      */
-    double flatten() const { return whole + (double)num / den; }
+    double flatten() const { return (double)num / den; }
 
     /**
      * @brief Get whole part of the fraction
      */
-    uint32_t get_whole() const { return whole; }
+    int64_t get_whole() const { return num / den; }
 
     /**
      * @brief Get the decimal part as a double
      */
-    double get_decimal() const { return (double)num / den; };
+    double get_decimal() const {
+      return (double)(num - get_whole() * den) / den;
+    }
 
     /**
      * @brief Get the decimal part as a numerator-denominator pair
      */
-    std::pair<uint32_t, uint32_t> get_frac() const { return {num, den}; }
+    std::pair<int64_t, int64_t> get_frac() const {
+      return {num - get_whole() * den, den};
+    }
 
     /**
      * @brief Calculate the inverse of the function
@@ -63,15 +69,35 @@ namespace aer {
     Fraction operator*(const Fraction &other) const;
     Fraction operator/(const Fraction &other) const;
 
-    friend Fraction operator+(const int32_t &a, const Fraction &b);
-    friend Fraction operator+(const Fraction &a, const int32_t &b);
-    friend Fraction operator-(const int32_t &a, const Fraction &b);
-    friend Fraction operator-(const Fraction &a, const int32_t &b);
-    friend Fraction operator*(const int32_t &a, const Fraction &b);
-    friend Fraction operator*(const Fraction &a, const int32_t &b);
-    friend Fraction operator/(const int32_t &a, const Fraction &b);
-    friend Fraction operator/(const Fraction &a, const int32_t &b);
+    std::strong_ordering operator<=>(const Fraction &other) const;
+
+    friend Fraction operator+(const int64_t &a, const Fraction &b);
+    friend Fraction operator+(const Fraction &a, const int64_t &b);
+    friend Fraction operator-(const int64_t &a, const Fraction &b);
+    friend Fraction operator-(const Fraction &a, const int64_t &b);
+    friend Fraction operator*(const int64_t &a, const Fraction &b);
+    friend Fraction operator*(const Fraction &a, const int64_t &b);
+    friend Fraction operator/(const int64_t &a, const Fraction &b);
+    friend Fraction operator/(const Fraction &a, const int64_t &b);
+
+    friend std::strong_ordering operator<=>(const int64_t &a,
+                                            const Fraction &b);
+    friend std::strong_ordering operator<=>(const Fraction &a,
+                                            const int64_t &b);
   };
 
+
+  Fraction operator+(const int64_t &a, const Fraction &b);
+  Fraction operator+(const Fraction &a, const int64_t &b);
+  Fraction operator-(const int64_t &a, const Fraction &b);
+  Fraction operator-(const Fraction &a, const int64_t &b);
+  Fraction operator*(const int64_t &a, const Fraction &b);
+  Fraction operator*(const Fraction &a, const int64_t &b);
+  Fraction operator/(const int64_t &a, const Fraction &b);
+  Fraction operator/(const Fraction &a, const int64_t &b);
+
+
+  std::strong_ordering operator<=>(const int64_t &a, const Fraction &b);
+  std::strong_ordering operator<=>(const Fraction &a, const int64_t &b);
 
 } // namespace aer

@@ -71,5 +71,7 @@ if(WIN32)
 endif()
 
 add_subdirectory(lib/core)
+add_subdirectory(lib/command)
 add_subdirectory(lib/input)
+add_subdirectory(lib/game)
 add_subdirectory(src)

@@ -1,119 +1,128 @@
-#pragma once
 #include "core/fraction.hh"
 #include <cassert>
 #include <numeric>
 
 
 void aer::Fraction::reduce() {
-  uint32_t virtual_whole = num / den;
-  whole += virtual_whole;
-  num -= virtual_whole * den;
-
-  uint32_t gcd = std::gcd(num, den);
-  if (gcd > 1) {
-    num /= gcd;
-    den /= gcd;
-  }
+  // reduce fractional part
+  int32_t gcd = std::gcd(num, den);
+  num /= gcd;
+  den /= gcd;
 }
 
 
-aer::Fraction::Fraction(uint32_t whole, uint32_t num, uint32_t den)
-    : whole(whole)
-    , num(num)
+aer::Fraction::Fraction()
+    : num(0)
+    , den(1) {}
+
+
+aer::Fraction::Fraction(int64_t whole, int64_t num, int64_t den)
+    : num(whole * den + num)
     , den(den) {
   assert(den != 0);
+  if (den < 0) {
+    den = -den;
+    num = -num;
+  }
   reduce();
 }
 
 
-aer::Fraction::Fraction(uint32_t num, uint32_t den)
-    : whole(0)
-    , num(num)
+aer::Fraction::Fraction(int64_t num, int64_t den)
+    : num(num)
     , den(den) {
   assert(den != 0);
+  if (den < 0) {
+    den = -den;
+    num = -num;
+  }
   reduce();
 }
 
 
 aer::Fraction aer::Fraction::inverse() const {
-  assert(num + whole != 0);
-  return Fraction(den, whole * den + num);
+  assert(num != 0);
+  return Fraction(den, num);
 }
 
 
-// Fraction/Fraction operators
+/* MEMBER OPERATORS ***********************************************************/
 
 
-aer::Fraction aer::Fraction::operator-() const {
-  return Fraction(-whole, -num, den);
-}
+aer::Fraction aer::Fraction::operator-() const { return Fraction(-num, den); }
 
 
 aer::Fraction aer::Fraction::operator+(const Fraction &other) const {
-  return Fraction(whole + other.whole, num * other.den + other.num * den,
-                  den * other.den);
+  return Fraction(num * other.den + other.num * den, den * other.den);
 }
 
 
 aer::Fraction aer::Fraction::operator-(const Fraction &other) const {
-  return Fraction(whole - other.whole, num * other.den - other.num * den,
-                  den * other.den);
+  return Fraction(num * other.den - other.num * den, den * other.den);
 }
 
 
 aer::Fraction aer::Fraction::operator*(const Fraction &other) const {
-  uint32_t true_num = whole * den + num;
-  uint32_t other_true_num = other.whole * other.den + other.num;
-  return Fraction(true_num * other_true_num, den, other.den);
+  return Fraction(num * other.num, den * other.den);
 }
 
 
 aer::Fraction aer::Fraction::operator/(const Fraction &other) const {
-  assert(other.num + other.whole != 0);
-  return *this * other.inverse();
+  assert(other.num != 0);
+  return Fraction(num * other.den, den * other.num);
 }
 
 
-// uint32_t/Fraction operators
-
-
-aer::Fraction aer::operator+(const int32_t &a, const aer::Fraction &b) {
-  return Fraction(b.whole + a, b.num, b.den);
+std::strong_ordering aer::Fraction::operator<=>(const Fraction &other) const {
+  return num * other.den <=> other.num * den;
 }
 
 
-aer::Fraction aer::operator+(const aer::Fraction &a, const int32_t &b) {
-  return Fraction(a.whole + b, a.num, a.den);
-};
+/* FRIEND OPERATORS ***********************************************************/
 
 
-aer::Fraction aer::operator-(const int32_t &a, const aer::Fraction &b) {
-  return Fraction(b.whole - a, b.num, b.den);
+aer::Fraction aer::operator+(const int64_t &a, const Fraction &b) {
+  return Fraction(b.num + a * b.den, b.den);
 }
 
 
-aer::Fraction aer::operator-(const aer::Fraction &a, const int32_t &b) {
-  return Fraction(a.whole - b, a.num, a.den);
-};
+aer::Fraction aer::operator+(const Fraction &a, const int64_t &b) {
+  return Fraction(a.num + b * a.den, a.den);
+}
 
+aer::Fraction aer::operator-(const int64_t &a, const Fraction &b) {
+  return Fraction(a * b.den - b.num, b.den);
+}
 
-aer::Fraction aer::operator*(const int32_t &a, const aer::Fraction &b) {
-  return Fraction(a * b.whole, a * b.num, b.den);
-};
-
-
-aer::Fraction aer::operator*(const aer::Fraction &a, const int32_t &b) {
-  return Fraction(b * a.whole, b * a.num, a.den);
+aer::Fraction aer::operator-(const Fraction &a, const int64_t &b) {
+  return Fraction(a.num - b * a.den, a.den);
 }
 
 
-aer::Fraction aer::operator/(const int32_t &a, const aer::Fraction &b) {
-  assert(b.num + b.whole != 0);
-  return a * b.inverse();
+aer::Fraction aer::operator*(const int64_t &a, const Fraction &b) {
+  return Fraction(a * b.num, b.den);
 }
 
 
-aer::Fraction aer::operator/(const aer::Fraction &a, const int32_t &b) {
-  assert(b != 0);
-  return a * Fraction(1, b);
+aer::Fraction aer::operator*(const Fraction &a, const int64_t &b) {
+  return Fraction(a.num * b, a.den);
+}
+
+
+aer::Fraction aer::operator/(const int64_t &a, const Fraction &b) {
+  return Fraction(a, 1) / b;
+}
+
+
+aer::Fraction aer::operator/(const Fraction &a, const int64_t &b) {
+  return a / Fraction(b, 1);
+}
+
+
+std::strong_ordering aer::operator<=>(const int64_t &a, const Fraction &b) {
+  return Fraction(a, 1) <=> b;
+}
+
+std::strong_ordering aer::operator<=>(const Fraction &a, const int64_t &b) {
+  return a <=> Fraction(b, 1);
 }
